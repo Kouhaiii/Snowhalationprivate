@@ -1,0 +1,53 @@
+-- Paste the program code into a new file named "gif_loop.lua" on your ComputerCraft computer.
+
+-- Configuration
+local gifFileName = "animation.gif" -- Replace with the name of your GIF file
+local frameDelay = 0.1 -- Adjust the delay between frames as needed
+
+-- Required APIs
+local term = require("term")
+local paintutils = require("paintutils")
+
+-- Function to split the GIF into individual frames
+local function splitGif(gifFileName)
+  local frames = {}
+  local frameIndex = 1
+
+  paintutils.loadImage(gifFileName)
+  local width, height = term.getSize()
+  
+  while true do
+    term.setCursorPos(1, 1)
+    local frame = paintutils.drawPixelBuffer(1, 1, width, height)
+    frames[frameIndex] = frame
+    frameIndex = frameIndex + 1
+    if not paintutils.drawPixelBuffer(1, 1, width, height) then
+      break
+    end
+  end
+
+  return frames
+end
+
+-- Function to display the frames on the monitor
+local function displayFrames(frames)
+  local monitor = peripheral.find("monitor")
+  if monitor then
+    local width, height = term.getSize()
+
+    while true do
+      for _, frame in ipairs(frames) do
+        term.clear()
+        term.setCursorPos(1, 1)
+        paintutils.drawImage(frame, 1, 1)
+        os.sleep(frameDelay)
+      end
+    end
+  else
+    print("No monitor detected.")
+  end
+end
+
+-- Main program logic
+local frames = splitGif(gifFileName)
+displayFrames(frames)
